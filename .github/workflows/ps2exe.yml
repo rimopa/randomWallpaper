@@ -32,4 +32,4 @@ jobs:
       with:
         files: randomWallpaper.exe
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        GITHUB_TOKEN: ${{ secrets.PAT }}
