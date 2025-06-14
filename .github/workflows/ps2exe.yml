@@ -26,10 +26,10 @@ jobs:
       with:
         name: wallpaper-exe
         path: randomWallpaper.exe
-        
+
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
         files: randomWallpaper.exe
       env:
-        GITHUB_TOKEN: ${{ secrets.PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
