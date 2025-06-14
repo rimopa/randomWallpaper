@@ -78,4 +78,5 @@ namespace Win32{
 
 add-type $code 
 [Win32.Wallpaper]::SetWallpaper($imgPath)
-exit 0
+exit $imgPath
+[Environment]::Exit(0) 
