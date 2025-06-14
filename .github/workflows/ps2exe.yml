@@ -32,13 +32,15 @@ jobs:
     - name: Sign the EXE
       shell: pwsh
       run: |
-        $signtool = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\x64\signtool.exe"
-        if (-not (Test-Path $signtool)) {
-          Write-Error "signtool.exe not found!"
-          exit 1
+        $sdkRoot = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+        $signtool = Get-ChildItem -Path $sdkRoot -Filter signtool.exe -Recurse -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1
+
+        if (-not $signtool) {
+            Write-Error "signtool.exe not found!"
+            exit 1
         }
 
-        & $signtool sign /f "$env:GITHUB_WORKSPACE\rimopaCert.pfx" /p "${{ secrets.CERT_PW }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$env:GITHUB_WORKSPACE\randomWallpaper.exe"
+        & $signtool.FullName sign /f "$env:GITHUB_WORKSPACE\MyCert.pfx" /p "${{ secrets.SIGNING_CERT_PASSWORD }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$env:GITHUB_WORKSPACE\randomWallpaper.exe"
 
     - name: Upload release artifact
       uses: actions/upload-artifact@v4
