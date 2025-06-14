@@ -40,7 +40,7 @@ jobs:
             exit 1
         }
 
-        & $signtool.FullName sign /f "$env:GITHUB_WORKSPACE\rimopaCert.pfx" /p "${{ secrets.SIGNING_CERT_PASSWORD }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$env:GITHUB_WORKSPACE\randomWallpaper.exe"
+        & $signtool.FullName sign /f "$env:GITHUB_WORKSPACE\rimopaCert.pfx" /p "${{ secrets.CERT_PW }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$env:GITHUB_WORKSPACE\randomWallpaper.exe"
 
     - name: Upload release artifact
       uses: actions/upload-artifact@v4
