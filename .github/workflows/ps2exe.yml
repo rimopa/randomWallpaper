@@ -19,7 +19,7 @@ jobs:
 
     - name: Generate EXE
       run: |
-        Invoke-ps2exe ./randomWallpaper.ps1 ./randomWallpaper.exe
+        Invoke-ps2exe ./randomWallpaper.ps1 ./randomWallpaper.exe -noConsole
 
     - name: Upload release artifact
       uses: actions/upload-artifact@v4
