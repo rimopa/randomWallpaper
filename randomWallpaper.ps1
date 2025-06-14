@@ -1,23 +1,36 @@
 #-------------------------------------------------------------------#
-# ScriptName : SetRandomWallpaper_MultiFolder.ps1                   #
-# Description : Random wallpaper from two folders.                  #
+# ScriptName : randomWallpaper.ps1                                  #
+# Description : Change your wallpaper to a random one in one or     #
+# more folders.                                                     #
 # Credits: rimopa                                                   #
 # Date : 13/6/2025                                                  #
 #-------------------------------------------------------------------#
-
-# Define the folder paths
-$folders = @(
-    "C:\Users\Usuario\OneDrive\Imágenes\wallpaper\PC",
-    "C:\Users\Usuario\OneDrive\Imágenes\wallpaper\PC+Phone"
+param(
+    [string[]] $folders = @()
 )
+# If you'd rather hardcode the folder paths insted of passing them as arguments, uncomment this and add it here::
+# If you do this, remember that powershell version 5 uses UTF-8 with BOM encoding. For more information, read https://en.wikipedia.org/wiki/Byte_order_mark
+#
+#$folders = @(
+#    "C:\Users\Usuario\OneDrive\Imágenes\wallpaper\PC",
+#    "C:\Users\Usuario\OneDrive\Imágenes\wallpaper\PC+Phone"
+#)
 
-#Allowed extensions
+# Validate that folders were provided
+if ($Folders.Count -eq 0) {
+    Write-Error "No folder paths provided. Please provide one or more folders using the -folders parameter."
+    exit 1
+}
+
+if ($PSVersionTable.PSVersion.Major -lt 5) {
+    Write-Error "PowerShell 5.0 or higher required. More information at https://github.com/rimopa/randomWallpaper/"
+    exit 1
+}
+
 $allowedExtensions = @(".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp", ".tiff")
 
-# Empty array to store all files
 $items = @()
 
-# Helper function to safely get files from a folder
 function Get-FilesSafely($folderPath) {
     if (Test-Path $folderPath) {
         $files = Get-ChildItem -Recurse -Path $folderPath -File -ErrorAction SilentlyContinue
@@ -38,24 +51,19 @@ function Get-FilesSafely($folderPath) {
     }
 }
 
-# Aggregate files from all folders
 foreach ($f in $folders) {
     $items += Get-FilesSafely $f
 }
 
-# Check if any files were found
 if ($items.Count -eq 0) {
     Write-Error "No images found in any folder. Exiting."
     exit 1
 }
 
-# Select a random item
 $randomItem = $items | Get-Random
 
-# Output the random item
-Write-Output "Random item selected: $($randomItem.FullName)"
+#Write-Output "Random item selected: $($randomItem.FullName)"
 
-# Apply the wallpaper change
 $imgPath = $randomItem.FullName
 $code = @' 
 using System.Runtime.InteropServices; 
