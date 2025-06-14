@@ -5,9 +5,7 @@
 # Credits: rimopa                                                   #
 # Date : 13/6/2025                                                  #
 #-------------------------------------------------------------------#
-param(
-    [string[]] $folders = @()
-)
+$folders = $args
 # If you'd rather hardcode the folder paths insted of passing them as arguments, uncomment this and add it here::
 # If you do this, remember that powershell version 5 uses UTF-8 with BOM encoding. For more information, read https://en.wikipedia.org/wiki/Byte_order_mark
 #
@@ -17,7 +15,7 @@ param(
 #)
 
 # Validate that folders were provided
-if ($Folders.Count -eq 0) {
+if ($folders.Count -eq 0) {
     Write-Error "No folder paths provided. Please provide one or more folders using the -folders parameter."
     exit 1
 }
@@ -80,3 +78,4 @@ namespace Win32{
 
 add-type $code 
 [Win32.Wallpaper]::SetWallpaper($imgPath)
+exit 0
