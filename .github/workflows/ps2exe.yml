@@ -14,12 +14,31 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Install ps2exe module
+      shell: pwsh
       run: |
         Install-Module -Name ps2exe -Force -Scope CurrentUser
 
     - name: Generate EXE
+      shell: pwsh
       run: |
         Invoke-ps2exe ./randomWallpaper.ps1 ./randomWallpaper.exe -noConsole
+
+    - name: Restore signing certificate from GitHub Secret
+      shell: pwsh
+      run: |
+        # Decode base64 cert back into PFX file
+        [IO.File]::WriteAllBytes("$env:GITHUB_WORKSPACE\rimopaCert.pfx", [Convert]::FromBase64String("${{ secrets.SIGNING_CERT_BASE64 }}"))
+
+    - name: Sign the EXE
+      shell: pwsh
+      run: |
+        $signtool = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\x64\signtool.exe"
+        if (-not (Test-Path $signtool)) {
+          Write-Error "signtool.exe not found!"
+          exit 1
+        }
+
+        & $signtool sign /f "$env:GITHUB_WORKSPACE\rimopaCert.pfx" /p "${{ secrets.CERT_PW }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$env:GITHUB_WORKSPACE\randomWallpaper.exe"
 
     - name: Upload release artifact
       uses: actions/upload-artifact@v4
