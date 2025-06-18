@@ -8,6 +8,8 @@ Requires PowerShell 5.0+
 C:\Path\To\randomWallpaper.exe "C:\Path\To\Wallpapers\1" "D:\Path\To\Wallpapers\2" "E:\Path\To\Wallpapers\3" ...
 ```
 
+The script only allows .jpg, .jpeg, .png, .bmp, .gif, .webp and .tiff. If you know of any other file extension Windows can use as desktop background, feel free to create and issue and tell me!
+
 ## FAQ
 
 ### Automatic execution
