@@ -10,7 +10,12 @@ The script only allows .jpg, .jpeg, .png, .bmp, .gif, .webp and .tiff. If you kn
 C:\Path\To\randomWallpaper.exe "C:\Path\To\Wallpapers\1" "D:\Path\To\Wallpapers\2" "E:\Path\To\Wallpapers\3" ...
 ```
 
-## FAQ
-
-### Automatic execution
-If you want to automatically execute this file, I recommend you use Windows' Task Scheduler.
+If you'd rather hardcode the folder paths insted of passing them as arguments, you can replace the `$folders = $args` at the top of the script with the following code (with your own paths):
+```
+$folders = @(
+    "C:\Path\To\Wallpapers\1",
+    "D:\Path\To\Wallpapers\2",
+    "E:\Path\To\Wallpapers\3"
+)
+```
+If you do this, remember that powershell version 5 uses UTF-8 with BOM encoding by default, which can mess with your paths depending on the characters you use. For more information, read [this](https://en.wikipedia.org/wiki/Byte_order_mark).
