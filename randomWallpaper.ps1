@@ -7,14 +7,6 @@
 #-------------------------------------------------------------------#
 $folders = $args
 
-# If you'd rather hardcode the folder paths insted of passing them as arguments, uncomment this and add it here::
-# If you do this, remember that powershell version 5 uses UTF-8 with BOM encoding. For more information, read https://en.wikipedia.org/wiki/Byte_order_mark
-#
-#$folders = @(
-#    "C:\Users\Usuario\OneDrive\Imágenes\wallpaper\PC",
-#    "C:\Users\Usuario\OneDrive\Imágenes\wallpaper\PC+Phone"
-#)
-
 # Validate that folders were provided
 if ($folders.Count -eq 0) {
     Write-Error "No folder paths provided. Please provide one or more folders using the -folders parameter."
@@ -92,6 +84,6 @@ $result = [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $imgPath, 
 if (-not $result) {
     Write-Error "Failed to set wallpaper. Error code: $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"
 }
-else{
+else {
     exit 0
 }
