@@ -5,7 +5,7 @@
 # Credits: rimopa                                                   #
 # Date : 20/6/2025                                                  #
 #-------------------------------------------------------------------#
-$folders = $args;
+$folders = $args
 
 # If you'd rather hardcode the folder paths insted of passing them as arguments, uncomment this and add it here::
 # If you do this, remember that powershell version 5 uses UTF-8 with BOM encoding. For more information, read https://en.wikipedia.org/wiki/Byte_order_mark
@@ -91,4 +91,7 @@ $result = [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $imgPath, 
 
 if (-not $result) {
     Write-Error "Failed to set wallpaper. Error code: $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"
+}
+else{
+    exit 0
 }
