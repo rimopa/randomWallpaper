@@ -3,9 +3,15 @@
 # Description : Change your wallpaper to a random one in one or     #
 # more folders.                                                     #
 # Credits: rimopa                                                   #
-# Date : 13/6/2025                                                  #
+# Date : 20/6/2025                                                  #
 #-------------------------------------------------------------------#
-$folders = $args
+param (
+    [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
+    [string[]]$folders,
+    [string]$style,
+    [bool]$tiles
+)
+
 # If you'd rather hardcode the folder paths insted of passing them as arguments, uncomment this and add it here::
 # If you do this, remember that powershell version 5 uses UTF-8 with BOM encoding. For more information, read https://en.wikipedia.org/wiki/Byte_order_mark
 #
@@ -63,20 +69,69 @@ $randomItem = $items | Get-Random
 #Write-Output "Random item selected: $($randomItem.FullName)"
 
 $imgPath = $randomItem.FullName
-$code = @' 
-using System.Runtime.InteropServices; 
-namespace Win32{ 
-     public class Wallpaper{ 
-        [DllImport("user32.dll", CharSet=CharSet.Auto)] 
-         static extern int SystemParametersInfo (int uAction , int uParam , string lpvParam , int fuWinIni) ; 
-         public static void SetWallpaper(string thePath){ 
-            SystemParametersInfo(20,0,thePath,3); 
-         }
-    }
- } 
-'@
 
-add-type $code 
-[Win32.Wallpaper]::SetWallpaper($imgPath)
-exit $imgPath
-[Environment]::Exit(0) 
+$regPath = "HKCU:\Control Panel\Desktop"
+
+Set-ItemProperty -Path $regPath -Name "Wallpaper" -Value $imgPath
+
+if ($style -ne $null) {
+    #0 – Center
+    #2 – Stretch
+    #6 – Fit
+    #10 – Fill
+    #22 – Span (multi-monitor)
+    if ($style -in @("fill", "10")) {
+        $styleVal = "10";
+    }
+    elseif ($style -in @("center", "0")) {
+        $styleVal = "0";
+
+    }
+    elseif ($style -in @("stretch", "2")) {
+
+        $styleVal = "2";
+    }
+    elseif ($style -in @("fit", "6")) {
+
+        $styleVal = "6";
+    }
+    elseif ($style -in @("span", "22")) {
+        $styleVal = "22";
+    }
+    else {
+        break;
+    }
+    Set-ItemProperty -Path $regPath -Name "WallpaperStyle" -Value $styleVal
+}
+
+if ($tiles -ne $null) {
+    #0 – No tile
+    #1 – Tile
+    if ($tiles) {
+        $tileVal = "1";
+    }
+    else {
+        $tileVal = "0";
+    }
+    Set-ItemProperty -Path $regPath -Name "TileWallpaper" -Value $tileVal
+}
+
+$SPI_SETDESKWALLPAPER = 0x0014
+$SPIF_UPDATEINIFILE = 0x01
+$SPIF_SENDWININICHANGE = 0x02
+
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+
+public class Wallpaper {
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+}
+"@
+
+$result = [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $imgPath, $SPIF_UPDATEINIFILE -bor $SPIF_SENDWININICHANGE)
+
+if (-not $result) {
+    Write-Error "Failed to set wallpaper. Error code: $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"
+}
