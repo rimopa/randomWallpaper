@@ -5,12 +5,7 @@
 # Credits: rimopa                                                   #
 # Date : 20/6/2025                                                  #
 #-------------------------------------------------------------------#
-param (
-    [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
-    [string[]]$folders,
-    [string]$style,
-    [bool]$tiles
-)
+$folders = $args;
 
 # If you'd rather hardcode the folder paths insted of passing them as arguments, uncomment this and add it here::
 # If you do this, remember that powershell version 5 uses UTF-8 with BOM encoding. For more information, read https://en.wikipedia.org/wiki/Byte_order_mark
@@ -70,56 +65,17 @@ $randomItem = $items | Get-Random
 
 $imgPath = $randomItem.FullName
 
+# Set registry keys (this affects the current user)
 $regPath = "HKCU:\Control Panel\Desktop"
 
 Set-ItemProperty -Path $regPath -Name "Wallpaper" -Value $imgPath
 
-if ($style -ne $null) {
-    #0 – Center
-    #2 – Stretch
-    #6 – Fit
-    #10 – Fill
-    #22 – Span (multi-monitor)
-    if ($style -in @("fill", "10")) {
-        $styleVal = "10";
-    }
-    elseif ($style -in @("center", "0")) {
-        $styleVal = "0";
-
-    }
-    elseif ($style -in @("stretch", "2")) {
-
-        $styleVal = "2";
-    }
-    elseif ($style -in @("fit", "6")) {
-
-        $styleVal = "6";
-    }
-    elseif ($style -in @("span", "22")) {
-        $styleVal = "22";
-    }
-    else {
-        break;
-    }
-    Set-ItemProperty -Path $regPath -Name "WallpaperStyle" -Value $styleVal
-}
-
-if ($tiles -ne $null) {
-    #0 – No tile
-    #1 – Tile
-    if ($tiles) {
-        $tileVal = "1";
-    }
-    else {
-        $tileVal = "0";
-    }
-    Set-ItemProperty -Path $regPath -Name "TileWallpaper" -Value $tileVal
-}
-
+# Define the SPI constants
 $SPI_SETDESKWALLPAPER = 0x0014
 $SPIF_UPDATEINIFILE = 0x01
 $SPIF_SENDWININICHANGE = 0x02
 
+# Add type to call the SystemParametersInfo function from user32.dll
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
@@ -130,6 +86,7 @@ public class Wallpaper {
 }
 "@
 
+# Call the function to update the wallpaper immediately
 $result = [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $imgPath, $SPIF_UPDATEINIFILE -bor $SPIF_SENDWININICHANGE)
 
 if (-not $result) {
