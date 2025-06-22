@@ -3,7 +3,7 @@ Change your Windows wallpaper to a random one in the indicated folder or folders
 
 Requires PowerShell 5.0+.
 
-The script only allows .jpg, .jpeg, .png, .bmp, .gif, .webp and .tiff. If you know of any other file extension Windows can use as desktop background, feel free to create and issue and tell me!
+The script only allows for .jpg, .jpeg, .png, .bmp, .gif, .webp and .tiff images. If you know of any other file extension Windows supports as a desktop background, feel free to tell me!
 
 ## Usage
 ```
