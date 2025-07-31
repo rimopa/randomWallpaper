@@ -3,13 +3,13 @@
 # Description : Change your wallpaper to a random one in one or     #
 # more folders.                                                     #
 # Credits: rimopa                                                   #
-# Date : 20/6/2025                                                  #
+# Date : 31/7/2025                                                  #
 #-------------------------------------------------------------------#
 $folders = $args
 
 # Validate that folders were provided
 if ($folders.Count -eq 0) {
-    Write-Error "No folder paths provided. Please provide one or more folders using the -folders parameter."
+    Write-Error "No folder paths provided. Please provide one or more folders."
     exit 1
 }
 
@@ -57,33 +57,28 @@ $randomItem = $items | Get-Random
 
 $imgPath = $randomItem.FullName
 
-# Set registry keys (this affects the current user)
 $regPath = "HKCU:\Control Panel\Desktop"
 
-Set-ItemProperty -Path $regPath -Name "Wallpaper" -Value $imgPath
-
-# Define the SPI constants
 $SPI_SETDESKWALLPAPER = 0x0014
 $SPIF_UPDATEINIFILE = 0x01
 $SPIF_SENDWININICHANGE = 0x02
 
-# Add type to call the SystemParametersInfo function from user32.dll
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
 
 public class Wallpaper {
-    [DllImport("user32.dll", SetLastError = true)]
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
 }
 "@
 
-# Call the function to update the wallpaper immediately
 $result = [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $imgPath, $SPIF_UPDATEINIFILE -bor $SPIF_SENDWININICHANGE)
 
 if (-not $result) {
     Write-Error "Failed to set wallpaper. Error code: $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"
 }
 else {
+    Write-Output $imgPath
     exit 0
 }
