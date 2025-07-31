@@ -57,7 +57,7 @@ $randomItem = $items | Get-Random
 
 $imgPath = $randomItem.FullName
 
-$regPath = "HKCU:\Control Panel\Desktop"
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "Wallpaper" -Value $imgPath
 
 $SPI_SETDESKWALLPAPER = 0x0014
 $SPIF_UPDATEINIFILE = 0x01
