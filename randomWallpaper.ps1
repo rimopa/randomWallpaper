@@ -79,6 +79,6 @@ if (-not $result) {
     Write-Error "Failed to set wallpaper. Error code: $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"
 }
 else {
-    Write-Output $imgPath
+    #Write-Output $imgPath
     exit 0
 }
