@@ -3,23 +3,43 @@
 # Description : Change your wallpaper to a random one in one or     #
 # more folders.                                                     #
 # Credits: rimopa                                                   #
-# Date : 31/7/2025                                                  #
+# Date : 7/9/2025                                                   #
 #-------------------------------------------------------------------#
-$folders = $args
+
+param(
+    [Parameter(Mandatory=$false)]
+    [switch]$log,
+    
+    [Parameter(ValueFromRemainingArguments=$true)]
+    [string[]]$folders
+)
+
+function Write-LogOutput {
+    param([string]$Message)
+    if ($log) {
+        Write-Output $Message
+    }
+}
+
+function Write-LogError {
+    param([string]$Message)
+    if ($log) {
+        Write-Error $Message
+    }
+}
 
 # Validate that folders were provided
 if ($folders.Count -eq 0) {
-    Write-Error "No folder paths provided. Please provide one or more folders."
+    Write-LogError "No folder paths provided. Please provide one or more folders."
     exit 1
 }
 
 if ($PSVersionTable.PSVersion.Major -lt 5) {
-    Write-Error "PowerShell 5.0 or higher required. More information at https://github.com/rimopa/randomWallpaper/"
+    Write-LogError "PowerShell 5.0 or higher required. More information at https://github.com/rimopa/randomWallpaper/"
     exit 1
 }
 
 $allowedExtensions = @(".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp", ".tiff")
-
 $items = @()
 
 function Get-FilesSafely($folderPath) {
@@ -32,12 +52,12 @@ function Get-FilesSafely($folderPath) {
             return $imageFiles
         }
         else {
-            Write-Output "Warning: Folder '$folderPath' contains no files."
+            Write-LogOutput "Warning: Folder '$folderPath' contains no files."
             return @()
         }
     }
     else {
-        Write-Output "Warning: Folder '$folderPath' does not exist."
+        Write-LogOutput "Warning: Folder '$folderPath' does not exist."
         return @()
     }
 }
@@ -47,16 +67,14 @@ foreach ($f in $folders) {
 }
 
 if ($items.Count -eq 0) {
-    Write-Error "No images found in any folder. Exiting."
+    Write-LogError "No images found in any folder. Exiting."
     exit 1
 }
 
 $randomItem = $items | Get-Random
-
-#Write-Output "Random item selected: $($randomItem.FullName)"
+Write-LogOutput "Random item selected: $($randomItem.FullName)"
 
 $imgPath = $randomItem.FullName
-
 Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "Wallpaper" -Value $imgPath
 
 $SPI_SETDESKWALLPAPER = 0x0014
@@ -66,7 +84,6 @@ $SPIF_SENDWININICHANGE = 0x02
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
-
 public class Wallpaper {
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
@@ -76,9 +93,9 @@ public class Wallpaper {
 $result = [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $imgPath, $SPIF_UPDATEINIFILE -bor $SPIF_SENDWININICHANGE)
 
 if (-not $result) {
-    Write-Error "Failed to set wallpaper. Error code: $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"
+    Write-LogError "Failed to set wallpaper. Error code: $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"
 }
 else {
-    #Write-Output $imgPath
+    Write-LogOutput $imgPath
     exit 0
 }
